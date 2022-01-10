@@ -1,7 +1,7 @@
 import {FormProcess, CSRFHash} from './mailer.js'
 
 var config = {
-	apiUrl:'https://mailerapi.criselgeek.com/mailer/v1/',
+	apiUrl:'https://fiasabot.chavodigital.com/api/v1/messenger-forms/',
 	module: 'contact',
 	messages: {
 		success: {
@@ -24,15 +24,34 @@ let rules = {
 		empty: {},
 		email: null
 	},
-	attachments: {
+	message: {
 		empty: {},
-		json: {}
 	}
 }
 
-window.onload = () => {
-	new CSRFHash('#contactForm', config).Get()
+window.extAsyncInit = function() {
+	//new CSRFHash('#contactForm', config).Get()
+	let btn = document.querySelector("#cancel-btn")
 	new FormProcess('#contactForm', config, rules).Send()
+		.then(response => {
+			console.log(response)
+			closeBrowser()
+		}).catch(error => {
+			console.log(error)
+		})
+	btn.addEventListener('click', e => {
+		e.preventDefault()
+		closeBrowser()
+	})
 }
 
-import './_base.sass'
+function closeBrowser() {
+	let errMsgText = document.querySelector('#error-msg')
+	MessengerExtensions.requestCloseBrowser(function success() {
+		console.log('Closed correctly')
+	}, function error(err) {
+		errMsgText.textContent = `Ocurrio un error al cerrar la ventana, código de Facebook del error: ${err}`
+	})
+}
+
+import './sass/forms.sass'

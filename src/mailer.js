@@ -18,28 +18,36 @@ export class FormProcess {
 	}
 
 	GetFormFields() {
-		let data = new FormData(this.form)
-		data.append('attachments', JSON.stringify(this.attachments))
-		let entries = data.entries()
-		let fields = {}
-		let errors = []
-		let attachKeys = this.attachments ? Object.keys(this.attachments) : []
-		for (var entry of entries) {
-			if(attachKeys.indexOf(entry[0]) == -1) {
-				let result = this.inputValidation(entry[0], entry[1])
-				if(result === true) {
-					fields[entry[0]] = entry[1]
-				} else {
-					errors.push(result)
+		return new Promise((resolve, reject) => {
+			let data = new FormData(this.form)
+			data.append('attachments', JSON.stringify(this.attachments))
+			let entries = data.entries()
+			let fields = {}
+			let errors = []
+			let attachKeys = this.attachments ? Object.keys(this.attachments) : []
+			for (var entry of entries) {
+				if(attachKeys.indexOf(entry[0]) == -1) {
+					let result = this.inputValidation(entry[0], entry[1])
+					if(result === true) {
+						fields[entry[0]] = entry[1]
+					} else {
+						errors.push(result)
+					}
 				}
 			}
-		}
-		if(errors.length > 0) {
-			this.displayErrors(errors)
-			this.loadingElement.classList.remove('spinner-show')
-		} else {
-			this.PostData(fields)
-		}
+			if(errors.length > 0) {
+				this.displayErrors(errors)
+				this.loadingElement.classList.remove('spinner-show')
+				reject(errors)
+			} else {
+				this.PostData(fields)
+					.then(response => {
+						resolve(response)
+					}).catch(error => {
+						reject(error)
+					})
+			}
+		})
 	}
 
 	displayErrors(errors) {
@@ -111,18 +119,22 @@ export class FormProcess {
 	}
 
 	PostData(data) {
-		if(data !== false) {
-			axios.post(this.apiUrl + this.config.module, data)
-				.then(response => {
-					this.showFormMessages(this.config.messages.success)
-					this.form.reset()
-				}).catch(error => {
-					console.log(error)
-					this.showFormMessages(this.config.messages.failed, false)
-				})
-		} else {
-			this.showFormMessages(this.config.messages.failed, false)
-		}
+		return new Promise((resolve, reject) => {
+			if(data !== false) {
+				axios.post(this.apiUrl + this.config.module, data)
+					.then(response => {
+						this.showFormMessages(this.config.messages.success)
+						this.form.reset()
+						resolve(response)
+					}).catch(error => {
+						this.showFormMessages(this.config.messages.failed, false)
+						reject(error)
+					})
+			} else {
+				this.showFormMessages(this.config.messages.failed, false)
+				reject('No payload provided')
+			}
+		})
 	}
 
 	showFormMessages(message, success = true) {
@@ -154,20 +166,27 @@ export class FormProcess {
 	}
 
 	Send() {
-		if(this.form) {
-			this.loadingElement.classList.remove('spinner-show')
-			this.attachmentUpload()
-			this.cleanErrorMessages()
-			this.form.addEventListener('click', () => {
+		return new Promise((resolve, reject) => {
+			if(this.form) {
+				this.loadingElement.classList.remove('spinner-show')
+				this.attachmentUpload()
 				this.cleanErrorMessages()
-			})
-			this.form.addEventListener('submit', e => {
-				e.preventDefault()
-				this.loadingElement.classList.add('spinner-show')
-				this.cleanErrorMessages()
-				this.GetFormFields()
-			})
-		}
+				this.form.addEventListener('click', () => {
+					this.cleanErrorMessages()
+				})
+				this.form.addEventListener('submit', e => {
+					e.preventDefault()
+					this.loadingElement.classList.add('spinner-show')
+					this.cleanErrorMessages()
+					this.GetFormFields()
+						.then(response => {
+							resolve(response)
+						}).catch(error => {
+							reject(error)
+						})
+				})
+			}
+		})
 	}
 }
 

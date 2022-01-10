@@ -5,7 +5,7 @@ module.exports = {
     'contact': './src/contact',
   },
   output: {
-    path: __dirname + '/assets',
+    path: `${__dirname}/assets`,
     filename: '[name].js'
   },
   watch: true,
