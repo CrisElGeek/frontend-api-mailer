@@ -23,12 +23,14 @@ let rules = {
 }
 
 window.onload = () => {
-	new FormProcess('#mailchimp-signup', config, rules).Send()
+	let FormName = '#mailchimp-signup'
+	new FormProcess(FormName, config, rules).Send()
 		.then(response => {
 			console.log(response)
 		}).catch(error => {
 			console.log(error)
 		})
+	new CSRFHash(FormName, config).Get()
 }
 
 import '../sass/forms.sass'
