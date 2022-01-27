@@ -2,8 +2,8 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 module.exports = {
 	mode: 'development',
 	entry: {
-		contact: './src/contact',
-		mailing: './src/mailchimp'
+		contact: './src/js/contact',
+		mailing: './src/js/mailchimp'
 	},
 	output: {
 		path: `${__dirname}/assets`,

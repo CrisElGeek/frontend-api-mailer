@@ -1,4 +1,4 @@
-import {FormProcess, CSRFHash} from './mailer.js'
+import {FormProcess, CSRFHash} from './libs/mailer.js'
 
 var config = {
 	apiUrl:'https://fiasabot.chavodigital.com/api/v1/messenger-forms/',
@@ -54,4 +54,4 @@ function closeBrowser() {
 	})
 }
 
-import './sass/forms.sass'
+import '../sass/forms.sass'
